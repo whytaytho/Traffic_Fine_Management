@@ -4,6 +4,15 @@ function isValidId(id) {
   return Number.isInteger(Number(id)) && Number(id) > 0;
 }
 
+function normalizeOptionalField(value) {
+  if (value === undefined || value === null) {
+    return null;
+  }
+
+  const trimmedValue = String(value).trim();
+  return trimmedValue === "" ? null : trimmedValue;
+}
+
 function validateOwnerInput(body) {
   const requiredFields = ["name", "phone_no", "email", "address", "license_no"];
 
@@ -21,18 +30,18 @@ async function getOwners(req, res, next) {
     const search = req.query.search ? `%${req.query.search.trim()}%` : null;
     const sql = search
       ? `
-        SELECT id, name, phone_no, email, address, license_no
+        SELECT id, name, phone_no, email, address, license_no, aadhar_id
         FROM owner
-        WHERE name LIKE ? OR email LIKE ? OR license_no LIKE ?
+        WHERE name LIKE ? OR email LIKE ? OR license_no LIKE ? OR aadhar_id LIKE ?
         ORDER BY id DESC
       `
       : `
-        SELECT id, name, phone_no, email, address, license_no
+        SELECT id, name, phone_no, email, address, license_no, aadhar_id
         FROM owner
         ORDER BY id DESC
       `;
 
-    const params = search ? [search, search, search] : [];
+    const params = search ? [search, search, search, search] : [];
     const [rows] = await pool.query(sql, params);
     res.json(rows);
   } catch (error) {
@@ -51,7 +60,7 @@ async function getOwnerById(req, res, next) {
 
     const [rows] = await pool.query(
       `
-        SELECT id, name, phone_no, email, address, license_no
+        SELECT id, name, phone_no, email, address, license_no, aadhar_id
         FROM owner
         WHERE id = ?
       `,
@@ -78,13 +87,20 @@ async function createOwner(req, res, next) {
       throw new Error(validationError);
     }
 
-    const { name, phone_no, email, address, license_no } = req.body;
+    const { name, phone_no, email, address, license_no, aadhar_id } = req.body;
     const [result] = await pool.query(
       `
-        INSERT INTO owner (name, phone_no, email, address, license_no)
-        VALUES (?, ?, ?, ?, ?)
+        INSERT INTO owner (name, phone_no, email, address, license_no, aadhar_id)
+        VALUES (?, ?, ?, ?, ?, ?)
       `,
-      [name.trim(), phone_no.trim(), email.trim(), address.trim(), license_no.trim()]
+      [
+        name.trim(),
+        phone_no.trim(),
+        email.trim(),
+        address.trim(),
+        license_no.trim(),
+        normalizeOptionalField(aadhar_id),
+      ]
     );
 
     const [rows] = await pool.query("SELECT * FROM owner WHERE id = ?", [result.insertId]);
@@ -110,14 +126,22 @@ async function updateOwner(req, res, next) {
       throw new Error(validationError);
     }
 
-    const { name, phone_no, email, address, license_no } = req.body;
+    const { name, phone_no, email, address, license_no, aadhar_id } = req.body;
     const [result] = await pool.query(
       `
         UPDATE owner
-        SET name = ?, phone_no = ?, email = ?, address = ?, license_no = ?
+        SET name = ?, phone_no = ?, email = ?, address = ?, license_no = ?, aadhar_id = ?
         WHERE id = ?
       `,
-      [name.trim(), phone_no.trim(), email.trim(), address.trim(), license_no.trim(), id]
+      [
+        name.trim(),
+        phone_no.trim(),
+        email.trim(),
+        address.trim(),
+        license_no.trim(),
+        normalizeOptionalField(aadhar_id),
+        id,
+      ]
     );
 
     if (!result.affectedRows) {

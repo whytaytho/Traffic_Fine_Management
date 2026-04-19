@@ -10,6 +10,7 @@ const initialForm = {
   email: "",
   address: "",
   license_no: "",
+  aadhar_id: "",
 };
 
 function OwnerForm() {
@@ -29,7 +30,11 @@ function OwnerForm() {
       try {
         setLoading(true);
         const response = await api.get(`/owners/${id}`);
-        setForm(response.data);
+        setForm({
+          ...initialForm,
+          ...response.data,
+          aadhar_id: response.data.aadhar_id || "",
+        });
       } catch (requestError) {
         setError(requestError.response?.data?.message || "Failed to load owner");
       } finally {
@@ -73,7 +78,7 @@ function OwnerForm() {
       <div className="panel-header">
         <div>
           <h3>{isEditMode ? "Edit Owner" : "Add Owner"}</h3>
-          <p>Maintain contact and license information for the vehicle owner.</p>
+          <p>Maintain contact information for the owner. Aadhar is optional and kept separate from the internal owner ID.</p>
         </div>
       </div>
 
@@ -106,6 +111,16 @@ function OwnerForm() {
             value={form.license_no}
             onChange={handleChange}
             required
+          />
+        </label>
+        <label>
+          <span>Aadhar ID</span>
+          <input
+            className="input"
+            name="aadhar_id"
+            value={form.aadhar_id}
+            onChange={handleChange}
+            placeholder="Optional"
           />
         </label>
         <label className="full-width">

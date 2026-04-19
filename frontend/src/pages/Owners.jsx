@@ -6,6 +6,20 @@ import ConfirmModal from "../components/ConfirmModal";
 import DataTable from "../components/DataTable";
 import Loader from "../components/Loader";
 
+function maskAadharId(value) {
+  if (!value) {
+    return "-";
+  }
+
+  const digitsOnly = String(value).replace(/\s+/g, "");
+
+  if (digitsOnly.length <= 4) {
+    return digitsOnly;
+  }
+
+  return `XXXX-XXXX-${digitsOnly.slice(-4)}`;
+}
+
 function Owners() {
   const navigate = useNavigate();
   const [owners, setOwners] = useState([]);
@@ -56,7 +70,7 @@ function Owners() {
       <section className="panel toolbar">
         <div>
           <h3>Owners</h3>
-          <p>Search owners by name, email, or license number.</p>
+          <p>Search owners by name, email, license number, or Aadhar ID. Table view masks Aadhar for privacy.</p>
         </div>
         <div className="toolbar-actions">
           <input
@@ -81,6 +95,11 @@ function Owners() {
             { key: "phone_no", label: "Phone" },
             { key: "email", label: "Email" },
             { key: "license_no", label: "License No" },
+            {
+              key: "aadhar_id",
+              label: "Aadhar ID",
+              render: (value) => maskAadharId(value),
+            },
             { key: "address", label: "Address" },
           ]}
           data={owners}
