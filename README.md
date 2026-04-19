@@ -154,3 +154,7 @@ The following references and official documentation were used during development
 ## Acknowledgement
 
 This project was developed with the help of official documentation, database design concepts, and implementation references from the technologies listed above. Limited AI-assisted support was also used during frontend structuring, UI refinement, and code organization, while the final project logic, database integration, and implementation decisions were reviewed and adapted to match the project requirements.
+
+## Group Members
+
+Tanmay Makhija, Atulya Utkarsh , Pakhi Pragaya,Shivaj Singh , Rudra Rawat
